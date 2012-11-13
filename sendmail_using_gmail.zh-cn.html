@@ -1,0 +1,41 @@
+<table>
+<tbody>
+<tr class="odd">
+<td align="left">layout: default</td>
+</tr>
+<tr class="even">
+<td align="left">title: 如何用Gmail发送邮件</td>
+</tr>
+</tbody>
+</table>
+<h1 id="如何用gmail发送邮件">如何用Gmail发送邮件</h1>
+<h3 id="问题">问题</h3>
+<p>如何用Gmail发送邮件？</p>
+<h3 id="解法">解法</h3>
+<p>安装和维护邮件服务器通常是沉闷乏味的。所以如果你有Gmail帐号，就可以使用Gmail做为SMTP服务器来发送邮件，我们唯一要做的就只是在<code>web.config</code>中指定Gmail的用户名和密码。</p>
+<pre><code>web.config.smtp_server = &#39;smtp.gmail.com&#39;
+web.config.smtp_port = 587
+web.config.smtp_username = &#39;cookbook@gmail.com&#39;
+web.config.smtp_password = &#39;secret&#39;
+web.config.smtp_starttls = True</code></pre>
+<p>设置好之后，web.sendmail就能使用Gmail帐号来发送邮件了，用起来和其他邮件服务器没有区别。</p>
+<pre><code>web.sendmail(&#39;cookbook@gmail.com&#39;, &#39;user@example.com&#39;, &#39;subject&#39;, &#39;message&#39;)</code></pre>
+<p>可以在这里了解有关Gmail设置的更多信息 <a href="http://mail.google.com/support/bin/answer.py?hl=en&amp;answer=13287">GMail: Configuring other mail clients</a></p>
+<h2><a href="index.html">首页</a></h2>
+
+<style>
+pre {
+    background-color:#F0F0F0;
+    border:1px solid #CCCBBA;
+       padding: 10px 10px 10px 20px;
+}
+code {
+    background: inherit;
+    color: inherit;
+}
+.warning {
+    border: 1px solid #FFAAAA;
+    padding: 10px;
+    background-color: #FFF0F0;
+}
+</style>

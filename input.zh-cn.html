@@ -1,0 +1,52 @@
+<table>
+<tbody>
+<tr class="odd">
+<td align="left">layout: default</td>
+</tr>
+<tr class="even">
+<td align="left">title: web.input</td>
+</tr>
+</tbody>
+</table>
+<h1 id="web.input">web.input</h1>
+<h2 id="web.input-1">web.input</h2>
+<h3 id="问题">问题</h3>
+<p>如何从form或是url参数接受用户数据.</p>
+<h3 id="解决方法">解决方法</h3>
+<p>web.input()方法返回一个包含从url(GET方法)或http header(POST方法,即表单POST)获取的变量的web.storage对象(类似字典).举个例子,如果你访问页面http://example.com/test?id=10,在Python后台你想取得 id=10 ,那么通过web.input()那就是小菜一碟:</p>
+<pre><code>class SomePage:
+    def GET(self):
+        user_data = web.input()
+        return &quot;&lt;h1&gt;&quot; + user_data.id + &quot;&lt;/h1&gt;&quot;</code></pre>
+<p>有时你想指定一个默认变量,而不想使用None.参考下面的代码:</p>
+<pre><code>class SomePage:
+    def GET(self):
+        user_data = web.input(id=&quot;no data&quot;)
+        return &quot;&lt;h1&gt;&quot; + user_data.id + &quot;&lt;/h1&gt;&quot;</code></pre>
+<p>注意,web.input()取得的值都会被当作string类型,即使你传递的是一些数字.</p>
+<p>如果你想传递一个多值变量,比如像这样:</p>
+<p><select multiple size="3"><option>foo</option><option>bar</option><option>baz</option></select></p>
+<p>你需要让web.input知道这是一个多值变量,否则会变成一串而不是一个变量 .传递一个list给 web.input 作为默认值,就会正常工作.举个例子, 访问 http://example.com?id=10&amp;id=20:</p>
+<pre><code>class SomePage:
+    def GET(self):
+        user_data = web.input(id=[])
+        return &quot;&lt;h1&gt;&quot; + &quot;,&quot;.join(user_data.id) + &quot;&lt;/h1&gt;&quot;</code></pre>
+<p>译者补充: 多值变量这儿,在WEB上除了上面所说的multiple select 和query strings外,用得最多的就是复选框(checkbox)了,另外还有多文件上传时的&lt;input type=&quot;file&quot; ...&gt;.</p>
+<h2><a href="index.html">首页</a></h2>
+
+<style>
+pre {
+    background-color:#F0F0F0;
+    border:1px solid #CCCBBA;
+       padding: 10px 10px 10px 20px;
+}
+code {
+    background: inherit;
+    color: inherit;
+}
+.warning {
+    border: 1px solid #FFAAAA;
+    padding: 10px;
+    background-color: #FFF0F0;
+}
+</style>

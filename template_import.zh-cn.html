@@ -1,0 +1,55 @@
+<table>
+<tbody>
+<tr class="odd">
+<td align="left">layout: default</td>
+</tr>
+<tr class="even">
+<td align="left">title: Import functions into templates</td>
+</tr>
+</tbody>
+</table>
+<h1 id="import-functions-into-templates">Import functions into templates</h1>
+<p><code>Problem</code>: How can I import a python module in template?</p>
+<p><code>Solution</code>:</p>
+<p>While you write templates, inevitably you will need to write some functions which is related to display logic only. web.py gives you the flexibility to write large blocks of code, including defining functions, directly in the template using <code>$code</code> blocks (if you don't know what is $code block, please read the <a href="/docs/0.3/templetor">tutorial for Templator</a> first). For example, the following code block will translate a status code from database to a human readable status message:</p>
+<pre><code>def status(c):
+    st = {}
+    st[0] = &#39;Not Started&#39;
+    st[1] = &#39;In Progress&#39;
+    st[2] = &#39;Finished&#39;
+    return st[c]</code></pre>
+<p>As you do more web.py development, you will write more such functions here and there in your templates. This makes the template messy and is a violation of the DRY (Don't Repeat Yourself) principle.</p>
+<p>Naturally, you will want to write a module, say <em>displayLogic.py</em> and import that module into every templates that needs such functionalities. Unfortunately, <code>import</code> is disabled in template for security reason. However, it is easy to solve this problem, you can import any function via the global namespace into the template:</p>
+<pre><code>#in your application.py:
+def status(c):
+    st = {}
+    st[0] = &#39;Not Started&#39;
+    st[1] = &#39;In Progress&#39;
+    st[2] = &#39;Finished&#39;
+    return st[c]
+
+render = web.template.render(&#39;templates&#39;, globals={&#39;stat&#39;:status})
+
+#in the template:
+$def with(status)
+... ...
+&lt;div&gt;Status: $stat(status)&lt;/div&gt;</code></pre>
+<p>Remember that you can import more than one name into the <em>globals</em> dict. This trick is also used in <a href="session_in_template.zh-cn">importing session variable into template</a>.</p>
+<h2><a href="index.html">首页</a></h2>
+
+<style>
+pre {
+    background-color:#F0F0F0;
+    border:1px solid #CCCBBA;
+       padding: 10px 10px 10px 20px;
+}
+code {
+    background: inherit;
+    color: inherit;
+}
+.warning {
+    border: 1px solid #FFAAAA;
+    padding: 10px;
+    background-color: #FFF0F0;
+}
+</style>

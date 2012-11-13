@@ -1,0 +1,139 @@
+<table>
+<tbody>
+<tr class="odd">
+<td align="left">layout: default</td>
+</tr>
+<tr class="even">
+<td align="left">title: 实时语言切换</td>
+</tr>
+</tbody>
+</table>
+<h1 id="实时语言切换">实时语言切换</h1>
+<h2 id="问题">问题:</h2>
+<p>如何实现实时语言切换？</p>
+<h2 id="解法">解法:</h2>
+<ul>
+<li>首先你必须阅读 <a href="i18n_support_in_template_file.zh-cn">模板语言中的i18n支持</a>, 然后尝试下面的代码。</li>
+</ul>
+<p>文件: code.py</p>
+<pre><code>import os
+import sys
+import gettext
+import web
+
+# File location directory.
+rootdir = os.path.abspath(os.path.dirname(__file__))
+
+# i18n directory.
+localedir = rootdir + &#39;/i18n&#39;
+
+# Object used to store all translations.
+allTranslations = web.storage()
+
+def get_translations(lang=&#39;en_US&#39;):
+    # Init translation.
+    if allTranslations.has_key(lang):
+        translation = allTranslations[lang]
+    elif lang is None:
+        translation = gettext.NullTranslations()
+    else:
+        try:
+            translation = gettext.translation(
+                    &#39;messages&#39;,
+                    localedir,
+                    languages=[lang],
+                    )
+        except IOError:
+            translation = gettext.NullTranslations()
+    return translation
+
+def load_translations(lang):
+    &quot;&quot;&quot;Return the translations for the locale.&quot;&quot;&quot;
+    lang = str(lang)
+    translation  = allTranslations.get(lang)
+    if translation is None:
+        translation = get_translations(lang)
+        allTranslations[lang] = translation
+
+        # Delete unused translations.
+        for lk in allTranslations.keys():
+            if lk != lang:
+                del allTranslations[lk]
+    return translation
+
+def custom_gettext(string):
+    &quot;&quot;&quot;Translate a given string to the language of the application.&quot;&quot;&quot;
+    translation = load_translations(session.get(&#39;lang&#39;))
+    if translation is None:
+        return unicode(string)
+    return translation.ugettext(string)
+
+urls = (
+&#39;/&#39;, &#39;index&#39;
+)
+
+render = web.template.render(&#39;templates/&#39;,
+        globals={
+            &#39;_&#39;: custom_gettext,
+            }
+        )
+
+app = web.application(urls, globals())
+
+# Init session.
+session = web.session.Session(app,
+        web.session.DiskStore(&#39;sessions&#39;),
+        initializer={
+            &#39;lang&#39;: &#39;en_US&#39;,
+            }
+        )
+
+class index:
+    def GET(self):
+        i = web.input()
+        lang = i.get(&#39;lang&#39;, &#39;en_US&#39;)
+
+        # Debug.
+        print &gt;&gt; sys.stderr, &#39;Language:&#39;, lang
+
+        session[&#39;lang&#39;] = lang
+        return render.index()
+
+if __name__ == &quot;__main__&quot;: app.run()</code></pre>
+<p>模板文件: templates/index.html.</p>
+<pre><code>$_(&#39;Hello&#39;)</code></pre>
+<p>不要忘记生成必要的po&amp;mo语言文件。参考: <a href="i18n_support_in_template_file.zh-cn">模板语言中的i18n支持</a></p>
+<p>现在运行code.py:</p>
+<pre><code>$ python code.py
+http://0.0.0.0:8080/</code></pre>
+<p>然后用你喜欢的浏览器访问下面的地址，检查语言是否改变:</p>
+<pre><code>http://your_server:8080/
+http://your_server:8080/?lang=en_US
+http://your_server:8080/?lang=zh_CN</code></pre>
+<p>你必须:</p>
+<ul>
+<li>确保语言文件(en_US、zh_CN等)可以动态改变。</li>
+<li>确保custom_gettext()调用越省资源约好。</li>
+</ul>
+<p>参考:</p>
+<ul>
+<li>这里有使用app.app_processor()的 <a href="http://groups.google.com/group/webpy/browse_thread/thread/a215837aa30e8f80">另一个方案</a>。</li>
+</ul>
+<h2><a href="index.html">首页</a></h2>
+
+<style>
+pre {
+    background-color:#F0F0F0;
+    border:1px solid #CCCBBA;
+       padding: 10px 10px 10px 20px;
+}
+code {
+    background: inherit;
+    color: inherit;
+}
+.warning {
+    border: 1px solid #FFAAAA;
+    padding: 10px;
+    background-color: #FFF0F0;
+}
+</style>

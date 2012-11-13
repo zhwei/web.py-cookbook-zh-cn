@@ -1,0 +1,57 @@
+<table>
+<tbody>
+<tr class="odd">
+<td align="left">layout: default</td>
+</tr>
+<tr class="even">
+<td align="left">title: 个别显示表单字段</td>
+</tr>
+</tbody>
+</table>
+<h1 id="个别显示表单字段">个别显示表单字段</h1>
+<h3 id="问题">问题：</h3>
+<p>怎样在模板中个别显示表单字段？</p>
+<h3 id="解决">解决：</h3>
+<p>你可以使用'render()'方法在你的模板中显示部分的表单字段。</p>
+<p>假设你想创建一个名字/姓氏表单。很简单，只有两个字段，不需要验证，只是为了测试目的。</p>
+<pre><code>from web import form
+simple_form = form.Form(
+    form.Textbox(&#39;name&#39;, description=&#39;Name&#39;),
+    form.Textbox(&#39;surname&#39;, description=&#39;Surname&#39;),
+)</code></pre>
+<p>通常你可以使用<code>simple_form.render（）</code>或<code>simple_form.render_css（）</code>。 但如你果你想一个一个的显示表单的字段，或者你怎样才能对模板中的表单显示拥有更多的控制权限？如果是这样，你可以对你的个别字段使用<code>render()</code>方法。</p>
+<p>我们定义了两个字段名称为<code>name</code>和<code>surname</code>。这些名称将自动成为<code>simple_form</code>对象的属性。</p>
+<pre><code>&gt;&gt;&gt; simple_form.name.render()
+&#39;&lt;input type=&quot;text&quot; name=&quot;name&quot; id=&quot;name&quot; /&gt;&#39;
+&gt;&gt;&gt; simple_form.surname.render()
+&#39;&lt;input type=&quot;text&quot; name=&quot;surname&quot; id=&quot;surname&quot; /&gt;&#39; </code></pre>
+<p>你同样可以通过类似的方法显示个别的描述：</p>
+<pre><code>&gt;&gt;&gt; simple_form.surname.description
+&#39;Surname&#39;</code></pre>
+<p>如果你有一个小模板片段（局部模板），你想统一的使用你所定义的所有表单字段？你可以使用表单对象的<code>inputs</code>属性迭代每个字段。下面是一个示例：</p>
+<pre><code>&gt;&gt;&gt; for input in simple_form.inputs:
+...     print input.description
+...     print input.render()
+... 
+Name
+&lt;input type=&quot;text&quot; name=&quot;name&quot; id=&quot;name&quot; /&gt;
+Surname
+&lt;input type=&quot;text&quot; name=&quot;surname&quot; id=&quot;surname&quot; /&gt;</code></pre>
+<h2><a href="index.html">首页</a></h2>
+
+<style>
+pre {
+    background-color:#F0F0F0;
+    border:1px solid #CCCBBA;
+       padding: 10px 10px 10px 20px;
+}
+code {
+    background: inherit;
+    color: inherit;
+}
+.warning {
+    border: 1px solid #FFAAAA;
+    padding: 10px;
+    background-color: #FFF0F0;
+}
+</style>

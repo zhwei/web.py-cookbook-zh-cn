@@ -1,0 +1,63 @@
+<table>
+<tbody>
+<tr class="odd">
+<td align="left">layout: default</td>
+</tr>
+<tr class="even">
+<td align="left">title: CGI deployment on Apache</td>
+</tr>
+</tbody>
+</table>
+<h1 id="cgi-deployment-on-apache">CGI deployment on Apache</h1>
+<p>Here are the simple steps needed to create and run an web.py application.</p>
+<ul>
+<li><p>Install web.py and flups</p></li>
+<li><p>Create the application as documented</p>
+<pre><code>if __name__ == &quot;__main__&quot;:
+    web.run(urls, globals())</code></pre></li>
+</ul>
+<p>For our example, let it be named <code>app.py</code>, located in <code>/www/app</code> and we need it accessible as <code>http://server/app/app.py</code>.</p>
+<ul>
+<li><p>Configure Apache (version 2.2 in this example)</p>
+<pre><code>ScriptAlias /app &quot;/www/app/&quot;
+&lt;Directory &quot;/www/app/&quot;&gt;
+        Options +ExecCGI +FollowSymLinks
+        Order allow,deny
+        Allow from all
+&lt;/Directory&gt;</code></pre></li>
+</ul>
+<p>That's it. Your application is accessible via <code>http://server/app/app.py/</code>. Additional URLs handled by the application are added to the end of the URL, for examples <code>http://server/app/app.py/myurl</code>.</p>
+<ul>
+<li><p>.htaccess configuration</p>
+<pre><code>      Options +ExecCGI
+      AddHandler cgi-script .py
+      DirectoryIndex index.py
+      &lt;IfModule mod_rewrite.c&gt;
+          RewriteEngine on
+          RewriteBase /
+          RewriteCond %{REQUEST_FILENAME} !-f
+          RewriteCond %{REQUEST_FILENAME} !-d
+          RewriteCond %{REQUEST_URI} !^/favicon.ico$
+          RewriteCond %{REQUEST_URI} !^(/.*)+index.py/
+          RewriteRule ^(.*)$ index.py/$1 [PT]
+      &lt;/IfModule&gt;</code></pre></li>
+</ul>
+<p>Here it is assumed that your application is called index.py. The above htaccess checks if some static file/directory exists failing which it routes the data to your index.py. Change the Rewrite Base to a sub-directory if needed.</p>
+<h2><a href="index.html">首页</a></h2>
+
+<style>
+pre {
+    background-color:#F0F0F0;
+    border:1px solid #CCCBBA;
+       padding: 10px 10px 10px 20px;
+}
+code {
+    background: inherit;
+    color: inherit;
+}
+.warning {
+    border: 1px solid #FFAAAA;
+    padding: 10px;
+    background-color: #FFF0F0;
+}
+</style>

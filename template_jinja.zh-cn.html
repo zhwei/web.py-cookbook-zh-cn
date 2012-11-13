@@ -1,0 +1,61 @@
+<table>
+<tbody>
+<tr class="odd">
+<td align="left">layout: default</td>
+</tr>
+<tr class="even">
+<td align="left">title: Use Jinja2 template engine in webpy</td>
+</tr>
+</tbody>
+</table>
+<h1 id="use-jinja2-template-engine-in-webpy">Use Jinja2 template engine in webpy</h1>
+<h3 id="问题">问题</h3>
+<p>如何在web.py中使用Jinja2 (http://jinja.pocoo.org/2/) 模板引擎?</p>
+<h3 id="方案">方案</h3>
+<p>首先需要安装Jinja2和webpy(0.3), 然后使用下面的代码做测试:</p>
+<pre><code>import web
+from web.contrib.template import render_jinja
+
+urls = (
+        &#39;/(.*)&#39;, &#39;hello&#39;
+        )
+
+app = web.application(urls, globals())
+
+render = render_jinja(
+        &#39;templates&#39;,   # 设置模板路径.
+        encoding = &#39;utf-8&#39;, # 编码.
+    )
+
+#添加或者修改一些全局方法.
+#render._lookup.globals.update(
+#       var=newvar,
+#       var2=newvar2,
+#)
+
+class hello:
+    def GET(self, name):
+        return render.hello(name=name)
+
+if __name__ == &quot;__main__&quot;:
+    app.run()</code></pre>
+<h3 id="模板文件-templateshello.html">模板文件: templates/hello.html</h3>
+<pre><code>Hello, {{ name }}.</code></pre>
+<h2><a href="index.html">首页</a></h2>
+
+<style>
+pre {
+    background-color:#F0F0F0;
+    border:1px solid #CCCBBA;
+       padding: 10px 10px 10px 20px;
+}
+code {
+    background: inherit;
+    color: inherit;
+}
+.warning {
+    border: 1px solid #FFAAAA;
+    padding: 10px;
+    background-color: #FFF0F0;
+}
+</style>

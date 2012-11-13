@@ -1,0 +1,35 @@
+<table>
+<tbody>
+<tr class="odd">
+<td align="left">layout: default</td>
+</tr>
+<tr class="even">
+<td align="left">title: 从post读取原始数据</td>
+</tr>
+</tbody>
+</table>
+<h1 id="从post读取原始数据">从post读取原始数据</h1>
+<h2 id="介绍">介绍</h2>
+<p>有时候，浏览器会通过post发送很多数据。在webpy，你可以这样操作。</p>
+<h2 id="代码">代码</h2>
+<pre><code>class RequestHandler():
+    def POST():
+        data = web.data() # 通过这个方法可以取到数据</code></pre>
+<h2><a href="index.html">首页</a></h2>
+
+<style>
+pre {
+    background-color:#F0F0F0;
+    border:1px solid #CCCBBA;
+       padding: 10px 10px 10px 20px;
+}
+code {
+    background: inherit;
+    color: inherit;
+}
+.warning {
+    border: 1px solid #FFAAAA;
+    padding: 10px;
+    background-color: #FFF0F0;
+}
+</style>

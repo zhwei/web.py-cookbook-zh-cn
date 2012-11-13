@@ -1,0 +1,54 @@
+<table>
+<tbody>
+<tr class="odd">
+<td align="left">layout: default</td>
+</tr>
+<tr class="even">
+<td align="left">title: db.insert 向数据库中新增数据</td>
+</tr>
+</tbody>
+</table>
+<h1 id="db.insert-向数据库中新增数据">db.insert 向数据库中新增数据</h1>
+<h3 id="问题">问题</h3>
+<p>如何向数据加新增数据？</p>
+<h3 id="解决办法">解决办法</h3>
+<p>在 0.3 中，数据库连接如下：</p>
+<pre><code>db = web.database(dbn=&#39;postgres&#39;, db=&#39;mydata&#39;, user=&#39;dbuser&#39;, pw=&#39;&#39;)</code></pre>
+<p>数据库连接写好以后，“insert” 操作如下：</p>
+<pre><code># 向 &#39;mytable&#39; 表中插入一条数据
+sequence_id = db.insert(&#39;mytable&#39;, firstname=&quot;Bob&quot;,lastname=&quot;Smith&quot;,joindate=web.SQLLiteral(&quot;NOW()&quot;))</code></pre>
+<p>上面的操作带入了几个参数，我们来说明一下：</p>
+<ul>
+<li>tablename</li>
+<li>seqname<br /></li>
+<li>_test<br /></li>
+<li>**values</li>
+</ul>
+<h2 id="tablename">tablename</h2>
+<p>表名，即你希望向哪个表新增数据。</p>
+<h2 id="seqname">seqname</h2>
+<p>可选参数，默认 None。Set <code>seqname</code> to the ID if it's not the default, or to <code>False</code>.</p>
+<h2 id="test">_test</h2>
+<p><code>_test</code> 参数可以让你看到 SQL 的执行过程：</p>
+<pre><code>results = db.select(&#39;mytable&#39;, offset=10, _test=True) 
+&gt;&lt;sql: &#39;SELECT * FROM mytable OFFSET 10&#39;&gt;</code></pre>
+<h2 id="values">**values</h2>
+<p>字段参数。如果没有赋值，数据库可能创建默认值或者发出警告。</p>
+<h2><a href="index.html">首页</a></h2>
+
+<style>
+pre {
+    background-color:#F0F0F0;
+    border:1px solid #CCCBBA;
+       padding: 10px 10px 10px 20px;
+}
+code {
+    background: inherit;
+    color: inherit;
+}
+.warning {
+    border: 1px solid #FFAAAA;
+    padding: 10px;
+    background-color: #FFF0F0;
+}
+</style>

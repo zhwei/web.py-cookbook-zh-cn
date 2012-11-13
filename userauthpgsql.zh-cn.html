@@ -1,0 +1,173 @@
+<table>
+<tbody>
+<tr class="odd">
+<td align="left">layout: default</td>
+</tr>
+<tr class="even">
+<td align="left">title: 在PostgreSQL下实现用户认证</td>
+</tr>
+</tbody>
+</table>
+<h1 id="在postgresql下实现用户认证">在PostgreSQL下实现用户认证</h1>
+<h2 id="问题">问题</h2>
+<ul>
+<li>如何利用PostgreSQL数据库实现一个用户认证系统？</li>
+</ul>
+<h2 id="解法">解法</h2>
+<ul>
+<li>用户认证系统有很多功能。在这个例子中，将展示如何在PostgreSQL数据库环境下一步一步完成一个用户认证系统</li>
+</ul>
+<h2 id="必需">必需</h2>
+<ul>
+<li>因为要用到make模板和postgreSQL数据库，所以要: import web from web.contrib.template import render_mako import pg</li>
+</ul>
+<h2 id="第一步创建数据库">第一步：创建数据库</h2>
+<p>首先，为创建一个用户表。虽然这个表结构非常简单，但对于大部分项目来说都足够用了。</p>
+<h2 id="section"></h2>
+<pre><code>CREATE TABLE example_users
+(
+  id serial NOT NULL,
+  user character varying(80) NOT NULL,
+  pass character varying(80) NOT NULL,
+  email character varying(100) NOT NULL,
+  privilege integer NOT NULL DEFAULT 0,
+  CONSTRAINT utilisateur_pkey PRIMARY KEY (id)
+)</code></pre>
+<h2 id="第二步确定网址">第二步：确定网址</h2>
+<p>登录和注销对应两个网址：</p>
+<ul>
+<li><p>&quot;Login&quot; 对应登录页</p></li>
+<li><p>&quot;Reset&quot; 对应注销页</p></li>
+</ul>
+<h2 id="section-1"></h2>
+<pre><code>urls = (
+    &#39;/login&#39;, &#39;login&#39;,
+    &#39;/reset&#39;, &#39;reset&#39;,
+     )</code></pre>
+<h2 id="第三步判断用户是否登录">第三步：判断用户是否登录</h2>
+<p>要判断用户是否已登录，是非常简单的，只要有个变量记录用户登录的状态即可。在login/reset类中使用这段代码:</p>
+<h2 id="section-2"></h2>
+<pre><code>def logged():
+    if session.login==1:
+        return True
+    else:
+        return False</code></pre>
+<h2 id="第四步简单的权限管理">第四步：简单的权限管理</h2>
+<p>我把我的用户划为四类：管理员，用户，读者（已登录），访客（未登录）。根据example_users表中定义的不同权限，选择不同的模板路径。</p>
+<h2 id="section-3"></h2>
+<pre><code>def create_render(privilege):
+    if logged():
+        if privilege==0:
+            render = render_mako(
+                directories=[&#39;templates/reader&#39;],
+                input_encoding=&#39;utf-8&#39;,
+                output_encoding=&#39;utf-8&#39;,
+                )
+        elif privilege==1:
+            render = render_mako(
+                directories=[&#39;templates/user&#39;],
+                input_encoding=&#39;utf-8&#39;,
+                output_encoding=&#39;utf-8&#39;,
+                )
+        elif privilege==2:
+            render = render_mako(
+                directories=[&#39;templates/admin&#39;],
+                input_encoding=&#39;utf-8&#39;,
+                output_encoding=&#39;utf-8&#39;,
+                )
+    else:
+        render = render_mako(
+            directories=[&#39;templates/communs&#39;],
+            input_encoding=&#39;utf-8&#39;,
+            output_encoding=&#39;utf-8&#39;,
+            )
+    return render</code></pre>
+<h2 id="第五登录login和注销reset的python类">第五：登录(Login)和注销(Reset)的python类</h2>
+<p>现在，让我们用个轻松的方法来解决： - 如果你已登录，就直接重定向到login_double.html模板文件 - 否则，还是到login.html。</p>
+<h2 id="section-4"></h2>
+<pre><code>class login:
+    def GET(self):
+        if logged():
+            render = create_render(session.privilege)
+            return &quot;%s&quot; % (
+                render.login_double()               )
+        else:
+            render = create_render(session.privilege)
+            return &quot;%s&quot; % (
+                render.login()
+                )</code></pre>
+<ul>
+<li>好了。现在写POST()方法。从.html文件中，我们得到表单提交的变量值(见login.html)，并根据变量值得到example_users表中对应的user数据</li>
+<li>如果登录通过了，就重定向到login_ok.html。</li>
+<li>如果没通过，就重定向到login_error.html。</li>
+</ul>
+<h2 id="section-5"></h2>
+<pre><code>    def POST(self):
+        user, passwd = web.input().user, web.input().passwd
+        ident = db.query(&quot;select * from example_users where user = &#39;%s&#39;&quot; % (user)).getresult()
+        try:
+            if passwd==ident[0][2]:
+                session.login=1
+                session.privilege=ident[0][4]
+                render = create_render(session.privilege)
+                return &quot;%s&quot; % (
+                        render.login_ok()
+                        )
+            else:
+                session.login=0
+                session.privilege=0
+                render = create_render(session.privilege)
+                return &quot;%s&quot; % (
+                    render.login_error()
+                    )
+        except:
+            session.login=0
+            session.privilege=0
+            render = create_render(session.privilege)
+            return &quot;%s&quot; % (
+                render.login_error()
+                )</code></pre>
+<p>对于reset方法，只要清除用户session，再重定向到logout.html模板页即可。 ## class reset: def GET(self): session.login=0 session.kill() render = create_render(session.privilege) return &quot;%s&quot; % ( render.logout() )</p>
+<h2 id="th-第六步html模板帮助">6th: 第六步：HTML模板帮助</h2>
+<p>嗯，我认为没有人想看这个，但我喜欢把所有的信息都提供出来。最重要的就是login.html。</p>
+<h2 id="section-6"></h2>
+<pre><code>&lt;FORM action=/login method=POST&gt;
+    &lt;table id=&quot;login&quot;&gt;
+        &lt;tr&gt;
+            &lt;td&gt;User: &lt;/td&gt;
+            &lt;td&gt;&lt;input type=text name=&#39;user&#39;&gt;&lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+            &lt;td&gt;Password: &lt;/td&gt;
+            &lt;td&gt;&lt;input type=&quot;password&quot; name=passwd&gt;&lt;/td&gt;
+        &lt;/tr&gt;
+        &lt;tr&gt;
+            &lt;td&gt;&lt;/td&gt;
+            &lt;td&gt;&lt;input type=submit value=LOGIN&gt;&lt;/td&gt;
+        &lt;/tr&gt;
+    &lt;/table&gt;
+&lt;/form&gt;</code></pre>
+<h2 id="第七问题或疑问">第七：问题或疑问？</h2>
+<ul>
+<li>邮件：您可以联想我，我的邮箱是guillaume(at)process-evolution(dot)fr</li>
+<li>IRC：#webpy on irc.freenode.net (pseudo: Ephedrax)</li>
+<li>翻译：我是法国人，我的英文不好...你可以修改我的文档(译注：哈哈，谦虚啥，你那是没见过wrongway的山东英文...)</li>
+</ul>
+<h2><a href="index.html">首页</a></h2>
+
+<style>
+pre {
+    background-color:#F0F0F0;
+    border:1px solid #CCCBBA;
+       padding: 10px 10px 10px 20px;
+}
+code {
+    background: inherit;
+    color: inherit;
+}
+.warning {
+    border: 1px solid #FFAAAA;
+    padding: 10px;
+    background-color: #FFF0F0;
+}
+</style>

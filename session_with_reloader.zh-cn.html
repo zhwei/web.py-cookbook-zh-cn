@@ -1,0 +1,59 @@
+<table>
+<tbody>
+<tr class="odd">
+<td align="left">layout: default</td>
+</tr>
+<tr class="even">
+<td align="left">title: 在调试模式下使用session</td>
+</tr>
+</tbody>
+</table>
+<h1 id="在调试模式下使用session">在调试模式下使用session</h1>
+<h1 id="问题">问题</h1>
+<p>如何在调试模式下使用session?</p>
+<h1 id="解法">解法</h1>
+<p>使用web.py自带的webserver提供web服务时，web.py就运行在调试模式下。当然最简单的办法就是禁用调试，只要令<code>web.config.debug = False</code>即可。</p>
+<pre><code>import web
+web.config.debug = False
+
+# rest of your code</code></pre>
+<p>如果非要用调试模式下使用session，可以用非主流的一些办法。哈哈</p>
+<p>因为调试模式支持模块重载入(重载入，绝非重载。是reload,而非override)，所以reloader会载入主模块两次，因此，就会创建两个session对象。但我们只要把session存储在全局的数据容器中，就能避免二次创建session。</p>
+<p>下面这个例子就是把session保存在 <code>web.config</code>中：</p>
+<pre><code>import web
+urls = (&quot;/&quot;, &quot;hello&quot;)
+
+app = web.application(urls, globals())
+
+if web.config.get(&#39;_session&#39;) is None:
+    session = web.session.Session(app, web.session.DiskStore(&#39;sessions&#39;), {&#39;count&#39;: 0})
+    web.config._session = session
+else:
+    session = web.config._session
+
+class hello:
+   def GET(self):
+       print &#39;session&#39;, session
+       session.count += 1
+       return &#39;Hello, %s!&#39; % session.count
+
+if __name__ == &quot;__main__&quot;:
+   app.run()</code></pre>
+<h2><a href="index.html">首页</a></h2>
+
+<style>
+pre {
+    background-color:#F0F0F0;
+    border:1px solid #CCCBBA;
+       padding: 10px 10px 10px 20px;
+}
+code {
+    background: inherit;
+    color: inherit;
+}
+.warning {
+    border: 1px solid #FFAAAA;
+    padding: 10px;
+    background-color: #FFF0F0;
+}
+</style>

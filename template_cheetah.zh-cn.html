@@ -1,0 +1,67 @@
+<table>
+<tbody>
+<tr class="odd">
+<td align="left">layout: default</td>
+</tr>
+<tr class="even">
+<td align="left">title: 在webpy中使用Cheetah模板引擎</td>
+</tr>
+</tbody>
+</table>
+<h1 id="在webpy中使用cheetah模板引擎">在webpy中使用Cheetah模板引擎</h1>
+<h3 id="问题">问题：</h3>
+<p>怎样在webpy中使用Cheetah模板引擎？</p>
+<h3 id="解决">解决：</h3>
+<p>您需要先安装webpy(0.3)和Cheetah：<a href="http://www.cheetahtemplate.org/">http://www.cheetahtemplate.org/</a>. 然后尝试使用下面的代码段：</p>
+<pre><code># encoding: utf-8
+# File: code.py
+
+import web
+from web.contrib.template import render_cheetah
+
+render = render_cheetah(&#39;templates/&#39;)
+
+urls = (
+    &#39;/(first)&#39;, &#39;first&#39;,
+    &#39;/(second)&#39;, &#39;second&#39;
+    )
+
+app = web.application(urls, globals(), web.reloader)
+
+class first:
+    def GET(self, name):
+        # cheetah template takes only keyword arguments,
+        # you should call it as:
+        #   return render.hello(name=name)
+        # Below is incorrect:
+        #   return render.hello(name)
+        return render.first(name=name)
+
+class second:
+    def GET(self, name):
+        return render.first(**locals())
+
+if __name__ == &quot;__main__&quot;:
+    app.run()</code></pre>
+<p>模板文件</p>
+<pre><code>## File: templates/first.html
+
+hello, $name.</code></pre>
+<h2><a href="index.html">首页</a></h2>
+
+<style>
+pre {
+    background-color:#F0F0F0;
+    border:1px solid #CCCBBA;
+       padding: 10px 10px 10px 20px;
+}
+code {
+    background: inherit;
+    color: inherit;
+}
+.warning {
+    border: 1px solid #FFAAAA;
+    padding: 10px;
+    background-color: #FFF0F0;
+}
+</style>

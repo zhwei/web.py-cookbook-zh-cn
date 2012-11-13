@@ -1,0 +1,149 @@
+<table>
+<tbody>
+<tr class="odd">
+<td align="left">layout: default</td>
+</tr>
+<tr class="even">
+<td align="left">title: RESTful doctesting using app.request</td>
+</tr>
+</tbody>
+</table>
+<h1 id="restful-doctesting-using-app.request">RESTful doctesting using app.request</h1>
+<h1 id="usrbinenv-python">!/usr/bin/env python</h1>
+<pre><code>&quot;&quot;&quot;
+RESTful web.py testing
+
+usage: python webapp.py 8080 [--test]
+
+&gt;&gt;&gt; req = app.request(&#39;/mathematicians&#39;, method=&#39;POST&#39;)
+&gt;&gt;&gt; req.status
+&#39;400 Bad Request&#39;
+
+&gt;&gt;&gt; name = {&#39;first&#39;: &#39;Beno\xc3\xaet&#39;, &#39;last&#39;: &#39;Mandelbrot&#39;}
+&gt;&gt;&gt; data = urllib.urlencode(name)
+&gt;&gt;&gt; req = app.request(&#39;/mathematicians&#39;, method=&#39;POST&#39;, data=data)
+&gt;&gt;&gt; req.status
+&#39;201 Created&#39;
+&gt;&gt;&gt; created_path = req.headers[&#39;Location&#39;]
+&gt;&gt;&gt; created_path
+&#39;/mathematicians/b-mandelbrot&#39;
+&gt;&gt;&gt; fn = &#39;&lt;h1 class=fn&gt;{0} {1}&lt;/h1&gt;&#39;.format(name[&#39;first&#39;], name[&#39;last&#39;])
+&gt;&gt;&gt; assert fn in app.request(created_path).data
+
+&quot;&quot;&quot;
+
+import doctest
+import urllib
+import sys
+
+import web
+
+
+paths = (
+  &#39;/mathematicians(/)?&#39;, &#39;Mathematicians&#39;,
+  &#39;/mathematicians/([a-z])-([a-z]{2,})&#39;, &#39;Mathematician&#39;
+)
+app = web.application(paths, globals())
+
+dbname = {True: &#39;test&#39;, False: &#39;production&#39;}[sys.argv[-1] == &#39;--test&#39;]
+db = {} # db = web.database(..., db=&#39;math_{0}&#39;.format(dbname))
+
+
+class Mathematicians:
+
+  def GET(self, slash=False):
+    &quot;&quot;&quot;list all mathematicians and form to create new one&quot;&quot;&quot;
+    if slash:
+        raise web.seeother(&#39;/mathematicians&#39;)
+    mathematicians = db.items() # db.select(...)
+    return web.template.Template(&quot;&quot;&quot;$def with (mathematicians)
+      &lt;!doctype html&gt;
+      &lt;html&gt;
+      &lt;head&gt;
+        &lt;meta charset=utf-8&gt;
+        &lt;title&gt;Mathematicians&lt;/title&gt;
+      &lt;/head&gt;
+      &lt;body&gt;
+        &lt;h1&gt;Mathematicians&lt;/h1&gt;
+        $if mathematicians:
+          &lt;ul class=blogroll&gt;
+            $for path, name in mathematicians:
+              &lt;li class=vcard&gt;&lt;a class=&quot;fn url&quot;
+              href=/mathematicians/$path&gt;$name.first $name.last&lt;/a&gt;&lt;/li&gt;
+          &lt;/ul&gt;
+        &lt;form action=/mathematicians method=post&gt;
+          &lt;label&gt;First &lt;input name=first type=text&gt;&lt;/label&gt;
+          &lt;label&gt;Last &lt;input name=last type=text&gt;&lt;/label&gt;
+          &lt;input type=submit value=Add&gt;
+        &lt;/form&gt;
+      &lt;/body&gt;
+      &lt;/html&gt;&quot;&quot;&quot;)(mathematicians)
+
+  def POST(self, _):
+    &quot;&quot;&quot;create new mathematician&quot;&quot;&quot;
+    name = web.input(&#39;first&#39;, &#39;last&#39;)
+    key = &#39;{0}-{1}&#39;.format(name.first[0].lower(), name.last.lower())
+    name.first, name.last = name.first.capitalize(), name.last.capitalize()
+    db[key] = name # db.insert(...)
+    path = &#39;/mathematicians/{0}&#39;.format(key)
+    web.ctx.status = &#39;201 Created&#39;
+    web.header(&#39;Location&#39;, path)
+    return web.template.Template(&quot;&quot;&quot;$def with (path, name)
+      &lt;!doctype html&gt;
+      &lt;html&gt;
+      &lt;head&gt;
+        &lt;meta charset=utf-8&gt;
+        &lt;title&gt;Profile Created&lt;/title&gt;
+      &lt;/head&gt;
+      &lt;body&gt;
+        &lt;p&gt;Profile created for &lt;a href=$path&gt;$name.first $name.last&lt;/a&gt;.&lt;/p&gt;
+      &lt;/body&gt;
+      &lt;/html&gt;&quot;&quot;&quot;)(path, name)
+
+
+class Mathematician:
+
+  def GET(self, first_initial, last_name):
+    &quot;&quot;&quot;display mathematician&quot;&quot;&quot;
+    key = &#39;{0}-{1}&#39;.format(first_initial, last_name)
+    try:
+        mathematician = db[key] # db.select(...)
+    except KeyError:
+        raise web.notfound()
+    return web.template.Template(&quot;&quot;&quot;$def with (name)
+      &lt;!doctype html&gt;
+      &lt;html&gt;
+      &lt;head&gt;
+        &lt;meta charset=utf-8&gt;
+        &lt;title&gt;$name.first $name.last&lt;/title&gt;
+      &lt;/head&gt;
+      &lt;body class=vcard&gt;
+        &lt;p&gt;&lt;a href=/mathematicians rel=up&gt;Mathematicians&lt;/a&gt; &amp;#x25B8;&lt;/p&gt;
+        &lt;h1 class=fn&gt;$name.first $name.last&lt;/h1&gt;
+      &lt;/body&gt;
+      &lt;/html&gt;&quot;&quot;&quot;)(mathematician)
+
+
+if __name__ == &quot;__main__&quot;:
+  if sys.argv[-1] == &#39;--test&#39;:
+    doctest.testmod()
+  else:
+    app.run()</code></pre>
+<h2><a href="index.html">首页</a></h2>
+
+<style>
+pre {
+    background-color:#F0F0F0;
+    border:1px solid #CCCBBA;
+       padding: 10px 10px 10px 20px;
+}
+code {
+    background: inherit;
+    color: inherit;
+}
+.warning {
+    border: 1px solid #FFAAAA;
+    padding: 10px;
+    background-color: #FFF0F0;
+}
+</style>

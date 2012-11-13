@@ -1,0 +1,51 @@
+<table>
+<tbody>
+<tr class="odd">
+<td align="left">layout: default</td>
+</tr>
+<tr class="even">
+<td align="left">title: 用户认证</td>
+</tr>
+</tbody>
+</table>
+<h1 id="用户认证">用户认证</h1>
+<h1 id="原作者没有写完但是可以参照下一节写得很详细">原作者没有写完，但是可以参照下一节，写得很详细</h1>
+<h2 id="问题">问题</h2>
+<p>如何完成一个用户认证系统？</p>
+<h2 id="解法">解法</h2>
+<p>用户认证系统由这几个部分组成：用户添加，用户登录，用户注销以及验证用户是否已登录。用户认证系统一般都需要一个数据库。在这个例子中，我们要用到MD5和SQLite。</p>
+<h2 id="section"></h2>
+<pre><code>import hashlib
+import web    
+
+def POST(self):
+    i = web.input()
+
+    authdb = sqlite3.connect(&#39;users.db&#39;)
+    pwdhash = hashlib.md5(i.password).hexdigest()
+    check = authdb.execute(&#39;select * from users where username=? and password=?&#39;, (i.username, pwdhash))
+    if check: 
+        session.loggedin = True
+        session.username = i.username
+        raise web.seeother(&#39;/results&#39;)   
+    else: return render.base(&quot;Those login details don&#39;t work.&quot;)   </code></pre>
+<h2 id="注意">注意</h2>
+<p>这仅仅是个例子，可不要在真实的生产环境中应用哦。</p>
+<h2><a href="index.html">首页</a></h2>
+
+<style>
+pre {
+    background-color:#F0F0F0;
+    border:1px solid #CCCBBA;
+       padding: 10px 10px 10px 20px;
+}
+code {
+    background: inherit;
+    color: inherit;
+}
+.warning {
+    border: 1px solid #FFAAAA;
+    padding: 10px;
+    background-color: #FFF0F0;
+}
+</style>

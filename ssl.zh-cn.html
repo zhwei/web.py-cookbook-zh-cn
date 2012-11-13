@@ -1,0 +1,48 @@
+<table>
+<tbody>
+<tr class="odd">
+<td align="left">layout: default</td>
+</tr>
+<tr class="even">
+<td align="left">title: 用cherrypy提供SSL支持</td>
+</tr>
+</tbody>
+</table>
+<h1 id="用cherrypy提供ssl支持">用cherrypy提供SSL支持</h1>
+<h2 id="问题">问题</h2>
+<p>如何用内置的cheerypy提供SSL支持？</p>
+<h2 id="解法">解法</h2>
+<pre><code>import web
+
+from web.wsgiserver import CherryPyWSGIServer
+
+CherryPyWSGIServer.ssl_certificate = &quot;path/to/ssl_certificate&quot;
+CherryPyWSGIServer.ssl_private_key = &quot;path/to/ssl_private_key&quot;
+
+urls = (&quot;/.*&quot;, &quot;hello&quot;)
+app = web.application(urls, globals())
+
+class hello:
+    def GET(self):
+        return &#39;Hello, world!&#39;
+
+if __name__ == &quot;__main__&quot;:
+    app.run()</code></pre>
+<h2><a href="index.html">首页</a></h2>
+
+<style>
+pre {
+    background-color:#F0F0F0;
+    border:1px solid #CCCBBA;
+       padding: 10px 10px 10px 20px;
+}
+code {
+    background: inherit;
+    color: inherit;
+}
+.warning {
+    border: 1px solid #FFAAAA;
+    padding: 10px;
+    background-color: #FFF0F0;
+}
+</style>

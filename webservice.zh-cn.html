@@ -1,0 +1,86 @@
+<table>
+<tbody>
+<tr class="odd">
+<td align="left">layout: default</td>
+</tr>
+<tr class="even">
+<td align="left">title: 用soaplib实现webservice</td>
+</tr>
+</tbody>
+</table>
+<h1 id="用soaplib实现webservice">用soaplib实现webservice</h1>
+<h3 id="问题">问题</h3>
+<p>如何用soaplib实现webservice?</p>
+<h3 id="解法">解法</h3>
+<p>Optio的<a href="http://trac.optio.webfactional.com/">soaplib</a>通过用装饰器指定类型，从而直接编写SOAP web service。而且它也是到目前为止，唯一为web service提供WSDL文档的Python类库。</p>
+<pre><code>import web 
+from soaplib.wsgi_soap import SimpleWSGISoapApp
+from soaplib.service import soapmethod
+from soaplib.serializers import primitive as soap_types
+
+urls = (&quot;/hello&quot;, &quot;HelloService&quot;,
+        &quot;/hello.wsdl&quot;, &quot;HelloService&quot;,
+        )
+render = web.template.Template(&quot;$def with (var)\n$:var&quot;)
+
+
+
+class SoapService(SimpleWSGISoapApp):
+    &quot;&quot;&quot;Class for webservice &quot;&quot;&quot;
+
+    #__tns__ = &#39;http://test.com&#39;
+
+    @soapmethod(soap_types.String,_returns=soap_types.String)
+    def hello(self,message):
+        &quot;&quot;&quot; Method for webservice&quot;&quot;&quot;
+        return &quot;Hello world &quot;+message
+
+
+
+class HelloService(SoapService):
+    &quot;&quot;&quot;Class for web.py &quot;&quot;&quot;
+    def start_response(self,status, headers):
+        web.ctx.status = status
+        for header, value in headers:
+            web.header(header, value)
+
+
+    def GET(self):
+        response = super(SimpleWSGISoapApp, self).__call__(web.ctx.environ, self.start_response)
+        return render(&quot;\n&quot;.join(response))
+
+
+    def POST(self):
+        response = super(SimpleWSGISoapApp, self).__call__(web.ctx.environ, self.start_response)
+        return render(&quot;\n&quot;.join(response))
+
+app=web.application(urls, globals())
+
+if __name__ == &quot;__main__&quot;:
+    app.run()</code></pre>
+<p>可以用soaplib客户端测试一下：</p>
+<pre><code>&gt;&gt;&gt; from soaplib.client import make_service_client
+&gt;&gt;&gt; from test import HelloService
+&gt;&gt;&gt; client = make_service_client(&#39;http://localhost:8080/hello&#39;, HelloService())
+&gt;&gt;&gt; client.hello(&#39;John&#39;)
+&#39;Hello world John&#39;</code></pre>
+<p>可以在<a href="http://localhost:8080/hello.wsdl">http://localhost:8080/hello.wsdl</a>查看WSDL。</p>
+<p>欲了解更多，请查看 <a href="http://trac.optio.webfactional.com/">soaplib</a>,</p>
+<h2><a href="index.html">首页</a></h2>
+
+<style>
+pre {
+    background-color:#F0F0F0;
+    border:1px solid #CCCBBA;
+       padding: 10px 10px 10px 20px;
+}
+code {
+    background: inherit;
+    color: inherit;
+}
+.warning {
+    border: 1px solid #FFAAAA;
+    padding: 10px;
+    background-color: #FFF0F0;
+}
+</style>

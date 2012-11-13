@@ -1,0 +1,74 @@
+<table>
+<tbody>
+<tr class="odd">
+<td align="left">layout: default</td>
+</tr>
+<tr class="even">
+<td align="left">title: 怎样使用数据库事务处理</td>
+</tr>
+</tbody>
+</table>
+<h1 id="怎样使用数据库事务处理">怎样使用数据库事务处理</h1>
+<h3 id="问题">问题：</h3>
+<p>怎样使用数据库事务处理？</p>
+<h3 id="解决">解决：</h3>
+<p>数据库对象有一个方法“transaction”,将启动一个新的事务，并返回事务对象。这个事务对象可以使用commit提交事务或rollback来回滚事务。</p>
+<pre><code>import web
+
+db = web.database(dbn=&quot;postgres&quot;, db=&quot;webpy&quot;, user=&quot;foo&quot;, pw=&quot;&quot;)
+t = db.transaction()
+try:
+    db.insert(&#39;person&#39;, name=&#39;foo&#39;)
+    db.insert(&#39;person&#39;, name=&#39;bar&#39;)
+except:
+    t.rollback()
+    raise
+else:
+    t.commit()</code></pre>
+<p>在python 2.5+以上的版本，事务同样可以在段中使用：</p>
+<pre><code>from __future__ import with_statement
+
+db = web.databse(dbn=&quot;postgres&quot;, db=&quot;webpy&quot;, user=&quot;foo&quot;, pw=&quot;&quot;)
+
+with db.transaction():
+    db.insert(&#39;person&#39;, name=&#39;foo&#39;)
+    db.insert(&#39;person&#39;, name=&#39;bar&#39;)</code></pre>
+<p>它同样可能有一个嵌套的事务：</p>
+<pre><code>def post(title, body, tags):
+    t = db.transaction()
+    try:
+        post_id = db.insert(&#39;post&#39;, title=title, body=body)
+        add_tags(post_id, tags)
+    except:
+        t.rollback()
+    else:
+        t.commit()
+
+def add_tags(post_id, tags):
+    t = db.transaction()
+    try:
+        for tag in tags:
+            db.insert(&#39;tag&#39;, post_id=post_id, tag=tag)
+    except:
+        t.rollback()
+    else:
+        t.commit()</code></pre>
+<p>嵌套的事务在sqlite中将被忽略，因为此特性不被sqlite支持。</p>
+<h2><a href="index.html">首页</a></h2>
+
+<style>
+pre {
+    background-color:#F0F0F0;
+    border:1px solid #CCCBBA;
+       padding: 10px 10px 10px 20px;
+}
+code {
+    background: inherit;
+    color: inherit;
+}
+.warning {
+    border: 1px solid #FFAAAA;
+    padding: 10px;
+    background-color: #FFF0F0;
+}
+</style>

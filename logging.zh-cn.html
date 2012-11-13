@@ -1,0 +1,55 @@
+<table>
+<tbody>
+<tr class="odd">
+<td align="left">layout: default</td>
+</tr>
+<tr class="even">
+<td align="left">title: 管理自带webserver日志</td>
+</tr>
+</tbody>
+</table>
+<h1 id="管理自带webserver日志">管理自带webserver日志</h1>
+<h2 id="问题">问题</h2>
+<p>如何操作web.py自带的webserver的日志？</p>
+<h2 id="解法">解法</h2>
+<p>我们可以用<a href="http://pypi.python.org/pypi/wsgilog/">wsgilog</a>来操作内置的webserver的日志，并做其为中间件加到应用中。</p>
+<p>如下，写一个Log类继承wsgilog.WsgiLog，在_init_中把参数传给基类，如<a href="http://github.com/harryf/urldammit/blob/234bcaae6deb65240e64ee3199213712ed62883a/dammit/log.py">这个例子</a>：</p>
+<pre><code>import sys, logging
+from wsgilog import WsgiLog, LogIO
+import config
+
+class Log(WsgiLog):
+    def __init__(self, application):
+        WsgiLog.__init__(
+            self,
+            application,
+            logformat = &#39;%(message)s&#39;,
+            tofile = True,
+            file = config.log_file,
+            interval = config.log_interval,
+            backups = config.log_backups
+            )
+        sys.stdout = LogIO(self.logger, logging.INFO)
+        sys.stderr = LogIO(self.logger, logging.ERROR)</code></pre>
+<p>接下来，当应用运行时，传递一个引用给上例中的Log类即可(假设上面代码是'mylog'模块的一部分，代码如下)：</p>
+<pre><code>from mylog import Log
+application = web.application(urls, globals())
+application.run(Log)</code></pre>
+<h2><a href="index.html">首页</a></h2>
+
+<style>
+pre {
+    background-color:#F0F0F0;
+    border:1px solid #CCCBBA;
+       padding: 10px 10px 10px 20px;
+}
+code {
+    background: inherit;
+    color: inherit;
+}
+.warning {
+    border: 1px solid #FFAAAA;
+    padding: 10px;
+    background-color: #FFF0F0;
+}
+</style>

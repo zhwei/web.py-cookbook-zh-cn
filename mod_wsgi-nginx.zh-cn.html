@@ -1,0 +1,45 @@
+<table>
+<tbody>
+<tr class="odd">
+<td align="left">layout: default</td>
+</tr>
+<tr class="even">
+<td align="left">title: deploying web.py with nginx and mod_wsgi</td>
+</tr>
+</tbody>
+</table>
+<h1 id="deploying-web.py-with-nginx-and-mod_wsgi">deploying web.py with nginx and mod_wsgi</h1>
+<p>It is possible to deploy web.py with nginx using a mod_wsgi similar to the module for Apache.</p>
+<p>After compiling and installing nginx with mod_wsgi, you can easily get a web.py app up and running with the following config* (edit the paths and settings with your own):</p>
+<pre><code>wsgi_python_executable  /usr/bin/python;
+
+server {
+    listen 80;
+    server_name www.domain_name.com domain_name.com;
+    root /path/to/your/webpy;
+
+    include /etc/nginx/wsgi_vars;
+    location / {
+        wsgi_pass /path/to/your/webpy/app.py;     
+     }
+}</code></pre>
+<p>*Note: This is a snippet of the relevant information to setup mod_wsgi for your web app and NOT a full config for running nginx.</p>
+<p>Helpful links:<br /> <a href="http://nginx.net/">nginx website</a><br /> <a href="http://wiki.codemongers.com/NginxNgxWSGIModule">wiki page on mod_wsgi</a></p>
+<h2><a href="index.html">首页</a></h2>
+
+<style>
+pre {
+    background-color:#F0F0F0;
+    border:1px solid #CCCBBA;
+       padding: 10px 10px 10px 20px;
+}
+code {
+    background: inherit;
+    color: inherit;
+}
+.warning {
+    border: 1px solid #FFAAAA;
+    padding: 10px;
+    background-color: #FFF0F0;
+}
+</style>

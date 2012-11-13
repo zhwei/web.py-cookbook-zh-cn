@@ -1,0 +1,74 @@
+<table>
+<tbody>
+<tr class="odd">
+<td align="left">layout: default</td>
+</tr>
+<tr class="even">
+<td align="left">title: db.select 查询</td>
+</tr>
+</tbody>
+</table>
+<h1 id="db.select-查询">db.select 查询</h1>
+<h2 id="问题">问题:</h2>
+<p>怎样执行数据库查询？</p>
+<h2 id="解决方案">解决方案:</h2>
+<p>如果是0.3版本, 连接部分大致如下:</p>
+<pre><code>db = web.database(dbn=&#39;postgres&#39;, db=&#39;mydata&#39;, user=&#39;dbuser&#39;, pw=&#39;&#39;)</code></pre>
+<p>当获取数据库连接后, 可以这样执行查询数据库:</p>
+<pre><code># Select all entries from table &#39;mytable&#39;
+entries = db.select(&#39;mytable&#39;)</code></pre>
+<p>select方法有下面几个参数:</p>
+<ul>
+<li>vars</li>
+<li>what</li>
+<li>where</li>
+<li>order</li>
+<li>group</li>
+<li>limit</li>
+<li>offset</li>
+<li>_test</li>
+</ul>
+<h3 id="vars">vars</h3>
+<p>vars变量用来填充查询条件. 如:</p>
+<pre><code>myvar = dict(name=&quot;Bob&quot;)
+results = db.select(&#39;mytable&#39;, myvar, where=&quot;name = $name&quot;)</code></pre>
+<h3 id="what">what</h3>
+<p>what是标明需要查询的列名, 默认是*, 但是你可以标明需要查询哪些列.</p>
+<pre><code>results = db.select(&#39;mytable&#39;, what=&quot;id,name&quot;)</code></pre>
+<h3 id="where">where</h3>
+<p>where查询条件, 如:</p>
+<pre><code>results = db.select(&#39;mytable&#39;, where=&quot;id&gt;100&quot;)</code></pre>
+<h3 id="order">order</h3>
+<p>排序方式:</p>
+<pre><code>results = db.select(&#39;mytable&#39;, order=&quot;post_date DESC&quot;)</code></pre>
+<h3 id="group">group</h3>
+<p>按group组排列.</p>
+<pre><code>results = db.select(&#39;mytable&#39;, group=&quot;color&quot;)    </code></pre>
+<h3 id="limit">limit</h3>
+<p>从多行中返回limit查询.</p>
+<pre><code>results = db.select(&#39;mytable&#39;, limit=10) </code></pre>
+<h3 id="offset">offset</h3>
+<p>偏移量, 从第几行开始.</p>
+<pre><code>results = db.select(&#39;mytable&#39;, offset=10) </code></pre>
+<h3 id="test">_test</h3>
+<p>查看运行时执行的SQL语句:</p>
+<pre><code>results = db.select(&#39;mytable&#39;, offset=10, _test=True) 
+&lt;sql: &#39;SELECT * FROM mytable OFFSET 10&#39;&gt;</code></pre>
+<h2><a href="index.html">首页</a></h2>
+
+<style>
+pre {
+    background-color:#F0F0F0;
+    border:1px solid #CCCBBA;
+       padding: 10px 10px 10px 20px;
+}
+code {
+    background: inherit;
+    color: inherit;
+}
+.warning {
+    border: 1px solid #FFAAAA;
+    padding: 10px;
+    background-color: #FFF0F0;
+}
+</style>

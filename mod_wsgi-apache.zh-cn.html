@@ -1,0 +1,80 @@
+<table>
+<tbody>
+<tr class="odd">
+<td align="left">layout: default</td>
+</tr>
+<tr class="even">
+<td align="left">title: 使用Apache + mod_wsgi部署webpy应用</td>
+</tr>
+</tbody>
+</table>
+<h1 id="使用apache-mod_wsgi部署webpy应用">使用Apache + mod_wsgi部署webpy应用</h1>
+<p>下面的步骤在Apache-2.2.3 (Red Hat Enterprise Linux 5.2, x86_64),mod_wsgi-2.0中测试通过。（译者注：本人在Windows2003 + Apache-2.2.15 + mod_wsgi-3.0也测试通过）</p>
+<p>注意：</p>
+<ul>
+<li>您可以使用您自己的项目名称替换'appname'。</li>
+<li>您可以使用您自己的文件名称替换'code.py'。</li>
+<li>/var/www/webpy-app 为包含您的code.py的文件夹目录路径。</li>
+<li>/var/www/webpy-app/code.py 是您的python文件的完整路径。</li>
+</ul>
+<p>步骤：</p>
+<ul>
+<li>下载和安装mod_wsgi从它的网站：</li>
+</ul>
+<p><a href="http://code.google.com/p/modwsgi/">http://code.google.com/p/modwsgi/</a>. 它将安装一个'.so'的模块到您的apache 模块文件夹，例如：</p>
+<pre><code>    /usr/lib64/httpd/modules/</code></pre>
+<ul>
+<li><p>在httpd.conf中配置Apache 加载 mod_wsgi模块和您的项目：</p>
+<pre><code>LoadModule wsgi_module modules/mod_wsgi.so
+
+WSGIScriptAlias /appname /var/www/webpy-app/code.py/
+
+Alias /appname/static /var/www/webpy-app/static/
+AddType text/html .py
+
+&lt;Directory /var/www/webpy-app/&gt;
+    Order deny,allow
+    Allow from all
+&lt;/Directory&gt;</code></pre></li>
+<li><p>演示文件 'code.py':</p>
+<pre><code>import web
+
+urls = (
+    &#39;/.*&#39;, &#39;hello&#39;,
+    )
+
+class hello:
+    def GET(self):
+        return &quot;Hello, world.&quot;
+
+application = web.application(urls, globals()).wsgifunc()</code></pre></li>
+<li><p>在您的浏览器地址栏中输入' http://your_server_name/appname' 来验证它是否可用。</p></li>
+</ul>
+<h1 id="注意-mod_wsgi-sessions">注意: mod_wsgi + sessions</h1>
+<p>如果您需要在mod_wsgi中使用sessions，您可以改变您的代码如下：</p>
+<pre><code>app = web.application(urls, globals())
+
+curdir = os.path.dirname(__file__)
+session = web.session.Session(app, web.session.DiskStore(curdir + &#39;/&#39; + &#39;sessions&#39;),)
+
+application = app.wsgifunc()</code></pre>
+<h1 id="mod_wsgi-性能">mod_wsgi 性能:</h1>
+<p>有关mod_wsgi的性能，请参考mod_wsgi的维基页： <a href="http://code.google.com/p/modwsgi/wiki/PerformanceEstimates">http://code.google.com/p/modwsgi/wiki/PerformanceEstimates</a></p>
+<h2><a href="index.html">首页</a></h2>
+
+<style>
+pre {
+    background-color:#F0F0F0;
+    border:1px solid #CCCBBA;
+       padding: 10px 10px 10px 20px;
+}
+code {
+    background: inherit;
+    color: inherit;
+}
+.warning {
+    border: 1px solid #FFAAAA;
+    padding: 10px;
+    background-color: #FFF0F0;
+}
+</style>

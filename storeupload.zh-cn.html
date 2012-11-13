@@ -1,0 +1,69 @@
+<table>
+<tbody>
+<tr class="odd">
+<td align="left">layout: default</td>
+</tr>
+<tr class="even">
+<td align="left">title: 保存上传的文件</td>
+</tr>
+</tbody>
+</table>
+<h1 id="保存上传的文件">保存上传的文件</h1>
+<h2 id="问题">问题</h2>
+<p>上传文件，并将其保存到预先设定的某个目录下。</p>
+<h2 id="方法">方法</h2>
+<pre><code>import web
+
+urls = (&#39;/upload&#39;, &#39;Upload&#39;)
+
+class Upload:
+    def GET(self):
+        web.header(&quot;Content-Type&quot;,&quot;text/html; charset=utf-8&quot;)
+        return &quot;&quot;&quot;&lt;html&gt;&lt;head&gt;&lt;/head&gt;&lt;body&gt;
+&lt;form method=&quot;POST&quot; enctype=&quot;multipart/form-data&quot; action=&quot;&quot;&gt;
+&lt;input type=&quot;file&quot; name=&quot;myfile&quot; /&gt;
+&lt;br/&gt;
+&lt;input type=&quot;submit&quot; /&gt;
+&lt;/form&gt;
+&lt;/body&gt;&lt;/html&gt;&quot;&quot;&quot;
+
+    def POST(self):
+        x = web.input(myfile={})
+        filedir = &#39;/path/where/you/want/to/save&#39; # change this to the directory you want to store the file in.
+        if &#39;myfile&#39; in x: # to check if the file-object is created
+            filepath=x.myfile.filename.replace(&#39;\\&#39;,&#39;/&#39;) # replaces the windows-style slashes with linux ones.
+            filename=filepath.split(&#39;/&#39;)[-1] # splits the and chooses the last part (the filename with extension)
+            fout = open(filedir +&#39;/&#39;+ filename,&#39;w&#39;) # creates the file where the uploaded file should be stored
+            fout.write(x.myfile.file.read()) # writes the uploaded file to the newly created file.
+            fout.close() # closes the file, upload complete.
+        raise web.seeother(&#39;/upload&#39;)
+
+
+if __name__ == &quot;__main__&quot;:
+   app = web.application(urls, globals()) 
+   app.run()</code></pre>
+<h2 id="hang-ups">Hang ups</h2>
+<p>同时还需要注意如下几点:</p>
+<ul>
+<li>转到 <a href="/fileupload">fileupload</a>。</li>
+<li>千万不要让用户把文件上传到那些不经过文件后缀和类型检查而执行文件的文件夹下。</li>
+<li>事实上，一定要以&quot;mb&quot;模式打开文件（在windows下）， 也就是二进制可写模式, 否则图片将无法上传。</li>
+</ul>
+<h2><a href="index.html">首页</a></h2>
+
+<style>
+pre {
+    background-color:#F0F0F0;
+    border:1px solid #CCCBBA;
+       padding: 10px 10px 10px 20px;
+}
+code {
+    background: inherit;
+    color: inherit;
+}
+.warning {
+    border: 1px solid #FFAAAA;
+    padding: 10px;
+    background-color: #FFF0F0;
+}
+</style>

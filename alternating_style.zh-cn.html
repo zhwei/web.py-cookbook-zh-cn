@@ -1,0 +1,55 @@
+<table>
+<tbody>
+<tr class="odd">
+<td align="left">layout: default</td>
+</tr>
+<tr class="even">
+<td align="left">title: 交替风格</td>
+</tr>
+</tbody>
+</table>
+<h1 id="交替风格">交替风格</h1>
+<h3 id="问题">问题:</h3>
+<p>你想通过数据集合动态的生成交替背景色的列表.</p>
+<h3 id="方法">方法:</h3>
+<p>Give templetor access to the <code>int</code> built-in and use modulo to test.</p>
+<h2 id="code.py">code.py</h2>
+<pre><code>web.template.Template.globals[&#39;int&#39;] = int</code></pre>
+<h2 id="template.html">template.html</h2>
+<pre><code>&lt;ul&gt;
+$var i: 0
+$for track in tracks:
+    $var i: ${int(self.i) + 1}
+    &lt;li class=&quot;
+    $if int(self.i) % 2:
+        odd
+    $else:
+        even
+    &quot;&gt;$track.title&lt;/li&gt;
+&lt;/ul&gt;</code></pre>
+<h2 id="new-templetor">New Templetor</h2>
+<p>In the new implementation of templetor (which will be the default when version .3 is released), within any template loop you have access to a $loop variable. This works like so:</p>
+<pre><code>&lt;ul&gt;
+$for foo in foos:
+    &lt;li class=&quot;$loop.parity&quot;&gt;
+    $foo
+    &lt;/li&gt;
+&lt;/ul&gt;</code></pre>
+<h2><a href="index.html">首页</a></h2>
+
+<style>
+pre {
+    background-color:#F0F0F0;
+    border:1px solid #CCCBBA;
+       padding: 10px 10px 10px 20px;
+}
+code {
+    background: inherit;
+    color: inherit;
+}
+.warning {
+    border: 1px solid #FFAAAA;
+    padding: 10px;
+    background-color: #FFF0F0;
+}
+</style>

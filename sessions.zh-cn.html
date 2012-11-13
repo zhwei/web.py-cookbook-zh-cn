@@ -1,0 +1,84 @@
+<table>
+<tbody>
+<tr class="odd">
+<td align="left">layout: default</td>
+</tr>
+<tr class="even">
+<td align="left">title: Sessions</td>
+</tr>
+</tbody>
+</table>
+<h1 id="sessions">Sessions</h1>
+<h3 id="问题">问题</h3>
+<p>如何在web.py中使用session</p>
+<h3 id="解法">解法</h3>
+<p><em>注意！！！：session并不能在调试模式(Debug mode)下正常工作，这是因为session与调试模试下的重调用相冲突(有点类似firefox下著名的Firebug插件，使用Firebug插件分析网页时，会在火狐浏览器之外单独对该网页发起请求，所以相当于同时访问该网页两次)，下一节中我们会给出在调试模式下使用session的解决办法。</em></p>
+<p><code>web.session</code>模块提供session支持。下面是一个简单的例子－－统计有多少人正在使用session(session计数器)：</p>
+<pre><code>import web
+web.config.debug = False
+urls = (
+    &quot;/count&quot;, &quot;count&quot;,
+    &quot;/reset&quot;, &quot;reset&quot;
+)
+app = web.application(urls, locals())
+session = web.session.Session(app, web.session.DiskStore(&#39;sessions&#39;), initializer={&#39;count&#39;: 0})
+
+class count:
+    def GET(self):
+        session.count += 1
+        return str(session.count)
+
+class reset:
+    def GET(self):
+        session.kill()
+        return &quot;&quot;
+
+if __name__ == &quot;__main__&quot;:
+    app.run()</code></pre>
+<p>web.py在处理请求之前，就加载session对象及其数据；在请求处理完之后，会检查session数据是否被改动。如果被改动，就交由session对象保存。</p>
+<p>上例中的<code>initializer</code>参数决定了session初始化的值，它是个可选参数。</p>
+<p>如果用数据库代替磁盘文件来存储session信息，只要用<code>DBStore</code>代替<code>DiskStore</code>即可。使用DBStore需要建立一个表，结构如下：</p>
+<pre><code> create table sessions (
+    session_id char(128) UNIQUE NOT NULL,
+    atime timestamp NOT NULL default current_timestamp,
+    data text
+);</code></pre>
+<p><code>DBStore</code>被创建要传入两个参数：<code>db</code>对象和session的表名。</p>
+<pre><code>db = web.database(dbn=&#39;postgres&#39;, db=&#39;mydatabase&#39;, user=&#39;myname&#39;, pw=&#39;&#39;)
+store = web.session.DBStore(db, &#39;sessions&#39;)
+session = web.session.Session(app, store, initializer={&#39;count&#39;: 0})</code></pre>
+<p>｀web.config｀中的<code>sessions_parameters</code>保存着session的相关设置，<code>sessions_parameters</code>本身是一个字典，可以对其修改。默认设置如下：</p>
+<pre><code>web.config.session_parameters[&#39;cookie_name&#39;] = &#39;webpy_session_id&#39;
+web.config.session_parameters[&#39;cookie_domain&#39;] = None
+web.config.session_parameters[&#39;timeout&#39;] = 86400, #24 * 60 * 60, # 24 hours   in seconds
+web.config.session_parameters[&#39;ignore_expiry&#39;] = True
+web.config.session_parameters[&#39;ignore_change_ip&#39;] = True
+web.config.session_parameters[&#39;secret_key&#39;] = &#39;fLjUfxqXtfNoIldA0A0J&#39;
+web.config.session_parameters[&#39;expired_message&#39;] = &#39;Session expired&#39;</code></pre>
+<ul>
+<li>cookie_name - 保存session id的Cookie的名称</li>
+<li>cookie_domain - 保存session id的Cookie的domain信息</li>
+<li>timeout - session的有效时间 ，以秒为单位</li>
+<li>ignore_expiry - 如果为True，session就永不过期</li>
+<li>ignore_change_ip - 如果为true，就表明只有在访问该session的IP与创建该session的IP完全一致时，session才被允许访问。</li>
+<li>secret_key - 密码种子，为session加密提供一个字符串种子</li>
+<li>expired_message - session过期时显示的提示信息。</li>
+</ul>
+<h2><a href="index.html">首页</a></h2>
+
+<style>
+pre {
+    background-color:#F0F0F0;
+    border:1px solid #CCCBBA;
+       padding: 10px 10px 10px 20px;
+}
+code {
+    background: inherit;
+    color: inherit;
+}
+.warning {
+    border: 1px solid #FFAAAA;
+    padding: 10px;
+    background-color: #FFF0F0;
+}
+</style>

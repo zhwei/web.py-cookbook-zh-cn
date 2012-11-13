@@ -1,0 +1,42 @@
+<table>
+<tbody>
+<tr class="odd">
+<td align="left">layout: default</td>
+</tr>
+<tr class="even">
+<td align="left">title: 跳转(seeother)与重定向(redirect)</td>
+</tr>
+</tbody>
+</table>
+<h1 id="跳转seeother与重定向redirect">跳转(seeother)与重定向(redirect)</h1>
+<h2 id="web.seeother-和-web.redirect">web.seeother 和 web.redirect</h2>
+<h3 id="问题">问题</h3>
+<p>在处理完用户输入后（比方说处理完一个表单），如何跳转到其他页面？</p>
+<h3 id="解法">解法</h3>
+<pre><code>class SomePage:
+    def POST(self):
+        # Do some application logic here, and then:
+        raise web.seeother(&#39;/someotherpage&#39;)</code></pre>
+<p>POST方法接收到一个post并完成处理之后，它将给浏览器发送一个303消息和新网址。接下来，浏览器就会对这个新网址发出GET请求，从而完成跳转。</p>
+<p>注意：web.seeother和web.redirect不支持0.3以下版本。</p>
+<h3 id="区别">区别</h3>
+<p>用web.redirect方法似乎也能做同样的事情，但通常来说，这并太友好。因为web.redirect发送的是301消息－这是永久重定向。因为大多数Web浏览器会缓存新的重定向，所以当我们再次执行该操作时，会自动直接访问重定向的新网址。很多时候，这不是我们所想要的结果。所以在提交表单时，尽量使用seeother。但是在下面要提到的这种场合，用redirect却是最恰当的：我们已经更改了网站的网址结构，但是仍想让用户书签/收藏夹中的旧网址不失效。</p>
+<p>(注：要了解seeother和redirect的区别，最好是看一下http协议中不同消息码的含义。)</p>
+<h2><a href="index.html">首页</a></h2>
+
+<style>
+pre {
+    background-color:#F0F0F0;
+    border:1px solid #CCCBBA;
+       padding: 10px 10px 10px 20px;
+}
+code {
+    background: inherit;
+    color: inherit;
+}
+.warning {
+    border: 1px solid #FFAAAA;
+    padding: 10px;
+    background-color: #FFF0F0;
+}
+</style>

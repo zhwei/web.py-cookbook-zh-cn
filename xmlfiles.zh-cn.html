@@ -1,0 +1,57 @@
+<table>
+<tbody>
+<tr class="odd">
+<td align="left">layout: default</td>
+</tr>
+<tr class="even">
+<td align="left">title: 提供XML访问</td>
+</tr>
+</tbody>
+</table>
+<h1 id="提供xml访问">提供XML访问</h1>
+<h3 id="问题">问题</h3>
+<p>如何在web.py中提供XML访问？</p>
+<p>如果需要为第三方应用收发数据，那么提供xml访问是很有必要的。</p>
+<h3 id="解法">解法</h3>
+<p>根据要访问的xml文件(如response.xml)创建一个XML模板。如果XML中有变量，就使用相应的模板标签进行替换。下面是一个例子：</p>
+<pre><code>$def with (code)
+&lt;?xml version=&quot;1.0&quot;?&gt;
+&lt;RequestNotification-Response&gt;
+&lt;Status&gt;$code&lt;/Status&gt;
+&lt;/RequestNotification-Response&gt;</code></pre>
+<p>为了提供这个XML，需要创建一个单独的web.py程序(如response.py)，它要包含下面的代码。注意：要用&quot;web.header('Content-Type', 'text/xml')&quot;来告知客户端－－正在发送的是一个XML文件。</p>
+<pre><code>import web
+
+render = web.template.render(&#39;templates/&#39;, cache=False)
+
+urls = (
+    &#39;/(.*)&#39;, &#39;index&#39;
+)
+
+app = web.application(urls, globals())
+
+class index:
+    def GET(self, code):
+        web.header(&#39;Content-Type&#39;, &#39;text/xml&#39;)
+        return render.index(code)
+
+web.webapi.internalerror = web.debugerror
+if __name__ == &#39;__main__&#39;: app.run()</code></pre>
+<h2><a href="index.html">首页</a></h2>
+
+<style>
+pre {
+    background-color:#F0F0F0;
+    border:1px solid #CCCBBA;
+       padding: 10px 10px 10px 20px;
+}
+code {
+    background: inherit;
+    color: inherit;
+}
+.warning {
+    border: 1px solid #FFAAAA;
+    padding: 10px;
+    background-color: #FFF0F0;
+}
+</style>

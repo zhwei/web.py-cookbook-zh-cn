@@ -1,0 +1,36 @@
+<table>
+<tbody>
+<tr class="odd">
+<td align="left">layout: default</td>
+</tr>
+<tr class="even">
+<td align="left">title: 在template中使用session</td>
+</tr>
+</tbody>
+</table>
+<h1 id="在template中使用session">在template中使用session</h1>
+<p><code>问题</code>: 我想在模板中使用session（比如：读取并显示session.username）</p>
+<p><code>解决</code>:</p>
+<p>在应用程序中的代码:</p>
+<pre><code>render = web.template.render(&#39;templates&#39;, globals={&#39;context&#39;: session})</code></pre>
+<p>在模板中的代码:</p>
+<pre><code>&lt;span&gt;You are logged in as &lt;b&gt;$context.username&lt;/b&gt;&lt;/span&gt;</code></pre>
+<p>你可以真正的使用任何符合语法的python变量名，比如上面用的_context_。我更喜欢在应用中直接使用'session'。</p>
+<h2><a href="index.html">首页</a></h2>
+
+<style>
+pre {
+    background-color:#F0F0F0;
+    border:1px solid #CCCBBA;
+       padding: 10px 10px 10px 20px;
+}
+code {
+    background: inherit;
+    color: inherit;
+}
+.warning {
+    border: 1px solid #FFAAAA;
+    padding: 10px;
+    background-color: #FFF0F0;
+}
+</style>

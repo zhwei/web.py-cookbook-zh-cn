@@ -1,0 +1,44 @@
+<table>
+<tbody>
+<tr class="odd">
+<td align="left">layout: default</td>
+</tr>
+<tr class="even">
+<td align="left">title: 使用字典动态构造where子句</td>
+</tr>
+</tbody>
+</table>
+<h1 id="使用字典动态构造where子句">使用字典动态构造where子句</h1>
+<h2 id="问题">问题</h2>
+<p>你希望创建一个字典来构造动态的where子句并且希望能够在查询语句中使用。</p>
+<h2 id="解决">解决</h2>
+<pre><code>&gt;&gt;&gt; import web
+&gt;&gt;&gt; db = web.database(dbn=&#39;postgres&#39;, db=&#39;mydb&#39;, user=&#39;postgres&#39;)
+&gt;&gt;&gt; where_dict = {&#39;col1&#39;: 1, col2: &#39;sometext&#39;}
+&gt;&gt;&gt; db.delete(&#39;mytable&#39;, where=web.db.sqlwhere(where_dict), _test=True)
+&lt;sql: &quot;DELETE FROM mytable WHERE col1 = 1 AND col2 = &#39;sometext&#39;&quot;&gt;</code></pre>
+<h2 id="解释">解释</h2>
+<p><code>web.db.sqlwhere</code> takes a Python dictionary as an argument and converts it into a string useful for where clause in different queries. You can also use an optional <code>grouping</code> argument to define the exact gouping of the individual keys. For instance:</p>
+<p><code>web.db.sqlwhere</code>将Python的字典作为参数并且转换为适用于不同的查询语句的where子句的string类型数据。你也可以使用<code>grouping</code>参数来定义链接字典中的key的链接字符。例子如下。</p>
+<pre><code>&gt;&gt;&gt; import web
+&gt;&gt;&gt; web.db.sqlwhere({&#39;a&#39;: 1, &#39;b&#39;: 2}, grouping=&#39; OR &#39;)
+&#39;a = 1 OR b = 2&#39;</code></pre>
+<p><code>grouping</code> 的默认值为 <code>' AND '</code>.</p>
+<h2><a href="index.html">首页</a></h2>
+
+<style>
+pre {
+    background-color:#F0F0F0;
+    border:1px solid #CCCBBA;
+       padding: 10px 10px 10px 20px;
+}
+code {
+    background: inherit;
+    color: inherit;
+}
+.warning {
+    border: 1px solid #FFAAAA;
+    padding: 10px;
+    background-color: #FFF0F0;
+}
+</style>

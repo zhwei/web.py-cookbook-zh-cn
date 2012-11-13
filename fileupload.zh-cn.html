@@ -1,0 +1,63 @@
+<table>
+<tbody>
+<tr class="odd">
+<td align="left">layout: default</td>
+</tr>
+<tr class="even">
+<td align="left">title: File Upload Recipe</td>
+</tr>
+</tbody>
+</table>
+<h1 id="file-upload-recipe">File Upload Recipe</h1>
+<h2 id="问题">问题</h2>
+<p>如果你不是很了解表单上传或者CGI的话, 你会觉得文件上传有点奇特.</p>
+<h2 id="解决方法">解决方法</h2>
+<pre><code>import web
+
+urls = (&#39;/upload&#39;, &#39;Upload&#39;)
+
+class Upload:
+    def GET(self):
+        return &quot;&quot;&quot;&lt;html&gt;&lt;head&gt;&lt;/head&gt;&lt;body&gt;
+&lt;form method=&quot;POST&quot; enctype=&quot;multipart/form-data&quot; action=&quot;&quot;&gt;
+&lt;input type=&quot;file&quot; name=&quot;myfile&quot; /&gt;
+&lt;br/&gt;
+&lt;input type=&quot;submit&quot; /&gt;
+&lt;/form&gt;
+&lt;/body&gt;&lt;/html&gt;&quot;&quot;&quot;
+
+    def POST(self):
+        x = web.input(myfile={})
+        web.debug(x[&#39;myfile&#39;].filename) # 这里是文件名
+        web.debug(x[&#39;myfile&#39;].value) # 这里是文件内容
+        web.debug(x[&#39;myfile&#39;].file.read()) # 或者使用一个文件对象
+        raise web.seeother(&#39;/upload&#39;)
+
+
+if __name__ == &quot;__main__&quot;:
+   app = web.application(urls, globals()) 
+   app.run()</code></pre>
+<h2 id="注意">注意</h2>
+<p>需要注意以下内容:</p>
+<ul>
+<li>表单需要一个enctype=&quot;multipart/form-data&quot;的属性, 否则不会正常工作.</li>
+<li>在webpy的代码里, 如果你需要默认值的话, myfile就需要默认值了(myfile={}), 文件会以字符串的形式传输 -- 这确实可以工作, 但是你会丢失文件的名称</li>
+</ul>
+<h2><a href="index.html">首页</a></h2>
+
+<style>
+pre {
+    background-color:#F0F0F0;
+    border:1px solid #CCCBBA;
+       padding: 10px 10px 10px 20px;
+}
+code {
+    background: inherit;
+    color: inherit;
+}
+.warning {
+    border: 1px solid #FFAAAA;
+    padding: 10px;
+    background-color: #FFF0F0;
+}
+</style>

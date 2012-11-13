@@ -1,0 +1,78 @@
+<table>
+<tbody>
+<tr class="odd">
+<td align="left">layout: default</td>
+</tr>
+<tr class="even">
+<td align="left">title: 如何流传输大文件</td>
+</tr>
+</tbody>
+</table>
+<h1 id="如何流传输大文件">如何流传输大文件</h1>
+<h3 id="问题">问题</h3>
+<p>如何流传输大文件？</p>
+<h3 id="解法">解法</h3>
+<p>要流传输大文件，需要添加传输译码(Transfer-Encoding)区块头，这样才能一边下载一边显示。否则，浏览器将缓冲所有数据直到下载完毕才显示。</p>
+<p>如果这样写：直接修改基础字符串(例中就是j)，然后用Yield返回－－是没有效果的。如果要使用Yield,就要向对所有内容使用yield。因为这个函式此时是一个产生器。(注：请处请详看Yield文档，在此不做过多论述。)</p>
+<p>例子</p>
+<pre><code># Simple streaming server demonstration
+# Uses time.sleep to emulate a large file read
+import web
+import time
+
+urls = (
+    &quot;/&quot;,    &quot;count_holder&quot;,
+    &quot;/(.*)&quot;,  &quot;count_down&quot;,
+    )
+app = web.application(urls, globals())
+
+
+class count_down:
+    def GET(self,count):
+        # These headers make it work in browsers
+        web.header(&#39;Content-type&#39;,&#39;text/html&#39;)
+        web.header(&#39;Transfer-Encoding&#39;,&#39;chunked&#39;)        
+        yield &#39;&lt;h2&gt;Prepare for Launch!&lt;/h2&gt;&#39;
+        j = &#39;&lt;li&gt;Liftoff in %s...&lt;/li&gt;&#39;
+        yield &#39;&lt;ul&gt;&#39;
+        count = int(count)
+        for i in range(count,0,-1):
+            out = j % i
+            time.sleep(1)
+            yield out
+        yield &#39;&lt;/ul&gt;&#39;
+        time.sleep(1)
+        yield &#39;&lt;h1&gt;Lift off&lt;/h1&gt;&#39;
+
+class count_holder:
+    def GET(self):
+        web.header(&#39;Content-type&#39;,&#39;text/html&#39;)
+        web.header(&#39;Transfer-Encoding&#39;,&#39;chunked&#39;)        
+        boxes = 4
+        delay = 3
+        countdown = 10
+        for i in range(boxes):
+            output = &#39;&lt;iframe src=&quot;/%d&quot; width=&quot;200&quot; height=&quot;500&quot;&gt;&lt;/iframe&gt;&#39; % (countdown - i)
+            yield output
+            time.sleep(delay)
+
+if __name__ == &quot;__main__&quot;:
+    app.run()</code></pre>
+<h2><a href="index.html">首页</a></h2>
+
+<style>
+pre {
+    background-color:#F0F0F0;
+    border:1px solid #CCCBBA;
+       padding: 10px 10px 10px 20px;
+}
+code {
+    background: inherit;
+    color: inherit;
+}
+.warning {
+    border: 1px solid #FFAAAA;
+    padding: 10px;
+    background-color: #FFF0F0;
+}
+</style>
